@@ -1,6 +1,4 @@
-import { v5 } from "https://deno.land/std@0.187.0/uuid/mod.ts";
-
-type Handler = (data?: string) => void;
+type Handler = (data?: string) => Promise<void>;
 
 export class PlaygroundManager {
   websocket: WebSocket;
@@ -10,25 +8,33 @@ export class PlaygroundManager {
     this.websocket = new WebSocket(url);
     this.pool = {};
 
-    this.websocket.addEventListener("message", ({ data }) => {
+    this.websocket.onmessage = async ({ data }) => {
       const decode = JSON.parse(data);
 
       switch (decode.type) {
         case 0:
-          this.pool[decode.id]();
+          await this.pool[decode.id]();
           break;
         case 1:
-        case 2:
-          this.pool[decode.id](decode.data);
+          await this.pool[decode.id](decode.data);
           break;
+        case 2:
+          await this.pool[decode.id](decode.data);
+          return;
       }
 
       delete this.pool[decode.id];
-    });
+    };
+  }
+
+  async wait() {
+    while (this.websocket.readyState !== 1) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
   }
 
   async create(name: string, language: "erlang" | "elixir", callback: Handler) {
-    const id = await v5.generate("create", new TextEncoder().encode(name));
+    const id = await generate();
     const packet = JSON.stringify({
       id,
       method: "create",
@@ -45,7 +51,7 @@ export class PlaygroundManager {
     content: string,
     callback: Handler
   ) {
-    const id = await v5.generate("update", new TextEncoder().encode(name));
+    const id = await generate();
     const packet = JSON.stringify({
       id,
       method: "set",
@@ -57,7 +63,7 @@ export class PlaygroundManager {
   }
 
   async run(name: string, callback: Handler) {
-    const id = await v5.generate("run", new TextEncoder().encode(name));
+    const id = await generate();
     const packet = JSON.stringify({
       id,
       method: "run",
@@ -67,4 +73,18 @@ export class PlaygroundManager {
     this.pool[id] = callback;
     this.websocket.send(packet);
   }
+
+  close() {
+    this.websocket.close();
+    this.pool = {};
+  }
+}
+
+function generate(): string {
+  return Array(12)
+    .fill(0)
+    .map((_) => {
+      return Math.ceil(Math.random() * 35).toString(36);
+    })
+    .join("");
 }
