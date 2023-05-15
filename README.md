@@ -4,7 +4,7 @@ Official asynchronous Erland client for Deno. We also use this for our UI.
 
 ## Usage
 
-*You can also define async callbacks.*
+_You can also define async callbacks._
 
 ### Start Connection
 
@@ -18,8 +18,6 @@ await manager.wait();
 
 ### Create Playground
 
-To create a new playground check following example:
-
 ```typescript
 // Creates new playground named "example" for Erlang programming language. If it gives an error, returns error as string.
 manager.create("example", "erlang", (response) => {
@@ -30,9 +28,6 @@ manager.create("example", "erlang", (response) => {
 ```
 
 ### Update Playground
-
-To update (it is actually `set`) playground code and dependencies, check
-following example:
 
 ```typescript
 // Dependencies to use (playground uses hex.pm)
@@ -56,14 +51,26 @@ manager.update("example", deps, content, (response) => {
 
 ### Run Playground
 
-To actually execute playground check following example:
-
 ```typescript
 manager.run("example", (response) => {
   if (response.type === "error") {
     console.log("Found error:", response.data);
   } else if (response.type === "data") {
+    // Output packet from playground
     console.error(response.data);
+  }
+});
+```
+
+### Delete Playground
+
+```typescript
+// Tries to remove playground
+manager.delete("example", (response) => {
+  if (response.type === "error") {
+    console.log("Found error:", response.data);
+  } else {
+    console.log("OK");
   }
 });
 ```

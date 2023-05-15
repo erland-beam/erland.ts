@@ -1,44 +1,67 @@
 type Handler = (data: PlaygroundResponse) => Promise<void> | void;
 
+/**
+ * Response type for playground.
+ *
+ * @remarks
+ * `data` will be undefined if `type` is "ok".
+ */
 export interface PlaygroundResponse {
   type: "ok" | "error" | "data";
   data?: string;
 }
 
+/**
+ * Playground manager allows you to create, set, run playgrounds.
+ */
 export class PlaygroundManager {
-  websocket: WebSocket;
-  pool: Record<string, Handler>;
+  private _websocket: WebSocket;
+  private _pool: Record<string, Handler>;
 
   constructor(url: string) {
-    this.websocket = new WebSocket(url);
-    this.pool = {};
+    this._websocket = new WebSocket(url);
+    this._pool = {};
 
-    this.websocket.onmessage = async ({ data }) => {
+    this._websocket.onmessage = async ({ data }) => {
       const decode = JSON.parse(data);
 
       switch (decode.type) {
         case 0:
-          await this.pool[decode.id]({ type: "ok" });
+          await this._pool[decode.id]({ type: "ok" });
           break;
         case 1:
-          await this.pool[decode.id]({ type: "error", data: decode.data });
+          await this._pool[decode.id]({ type: "error", data: decode.data });
           break;
         case 2:
-          await this.pool[decode.id]({ type: "data", data: decode.data });
+          await this._pool[decode.id]({ type: "data", data: decode.data });
           return;
       }
 
-      delete this.pool[decode.id];
+      delete this._pool[decode.id];
     };
   }
 
-  async wait() {
-    while (this.websocket.readyState !== 1) {
+  /**
+   * Wait until connection is ready to use.
+   */
+  public async wait() {
+    while (this._websocket.readyState !== 1) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
   }
 
-  create(name: string, language: "erlang" | "elixir", callback: Handler) {
+  /**
+   * Create a new playground.
+   *
+   * @param name - Name of the playground
+   * @param language - Playground language
+   * @param callback - Callback for response
+   */
+  public create(
+    name: string,
+    language: "erlang" | "elixir",
+    callback: Handler,
+  ) {
     const id = generate();
     const packet = JSON.stringify({
       id,
@@ -46,11 +69,19 @@ export class PlaygroundManager {
       params: [language, name],
     });
 
-    this.pool[id] = callback;
-    this.websocket.send(packet);
+    this._pool[id] = callback;
+    this._websocket.send(packet);
   }
 
-  update(
+  /**
+   * Update (set) playground.
+   *
+   * @param name - Name of the playground
+   * @param deps - Dependencies as `name: version`
+   * @param content - Playground file content
+   * @param callback - Callback for response
+   */
+  public update(
     name: string,
     deps: Record<string, string>,
     content: string,
@@ -63,11 +94,17 @@ export class PlaygroundManager {
       params: [deps, content, name],
     });
 
-    this.pool[id] = callback;
-    this.websocket.send(packet);
+    this._pool[id] = callback;
+    this._websocket.send(packet);
   }
 
-  run(name: string, callback: Handler) {
+  /**
+   * Run playground.
+   *
+   * @param name - Name of the playground
+   * @param callback - Callback for response
+   */
+  public run(name: string, callback: Handler) {
     const id = generate();
     const packet = JSON.stringify({
       id,
@@ -75,13 +112,34 @@ export class PlaygroundManager {
       params: [name],
     });
 
-    this.pool[id] = callback;
-    this.websocket.send(packet);
+    this._pool[id] = callback;
+    this._websocket.send(packet);
   }
 
-  close() {
-    this.websocket.close();
-    this.pool = {};
+  /**
+   * Delete playground.
+   *
+   * @param name - Name of the playground
+   * @param callback - Callback for response
+   */
+  public delete(name: string, callback: Handler) {
+    const id = generate();
+    const packet = JSON.stringify({
+      id,
+      method: "delete",
+      params: [name],
+    });
+
+    this._pool[id] = callback;
+    this._websocket.send(packet);
+  }
+
+  /**
+   * Close connection and reset ID pool.
+   */
+  public close() {
+    this._websocket.close();
+    this._pool = {};
   }
 }
 
