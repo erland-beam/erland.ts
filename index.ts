@@ -1,4 +1,4 @@
-type Handler = (data: PlaygroundResponse) => Promise<void>;
+type Handler = (data: PlaygroundResponse) => Promise<void> | void;
 
 export interface PlaygroundResponse {
   type: "ok" | "error" | "data";
@@ -38,8 +38,8 @@ export class PlaygroundManager {
     }
   }
 
-  async create(name: string, language: "erlang" | "elixir", callback: Handler) {
-    const id = await generate();
+  create(name: string, language: "erlang" | "elixir", callback: Handler) {
+    const id = generate();
     const packet = JSON.stringify({
       id,
       method: "create",
@@ -50,13 +50,13 @@ export class PlaygroundManager {
     this.websocket.send(packet);
   }
 
-  async update(
+  update(
     name: string,
     deps: Record<string, string>,
     content: string,
     callback: Handler,
   ) {
-    const id = await generate();
+    const id = generate();
     const packet = JSON.stringify({
       id,
       method: "set",
@@ -67,8 +67,8 @@ export class PlaygroundManager {
     this.websocket.send(packet);
   }
 
-  async run(name: string, callback: Handler) {
-    const id = await generate();
+  run(name: string, callback: Handler) {
+    const id = generate();
     const packet = JSON.stringify({
       id,
       method: "run",
