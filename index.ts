@@ -54,7 +54,7 @@ export class PlaygroundManager {
     name: string,
     deps: Record<string, string>,
     content: string,
-    callback: Handler
+    callback: Handler,
   ) {
     const id = await generate();
     const packet = JSON.stringify({
