@@ -1,4 +1,9 @@
-type Handler = (data?: string) => Promise<void>;
+type Handler = (data: PlaygroundResponse) => Promise<void>;
+
+export interface PlaygroundResponse {
+  type: "ok" | "error" | "data";
+  data?: string;
+}
 
 export class PlaygroundManager {
   websocket: WebSocket;
@@ -13,13 +18,13 @@ export class PlaygroundManager {
 
       switch (decode.type) {
         case 0:
-          await this.pool[decode.id]();
+          await this.pool[decode.id]({ type: "ok" });
           break;
         case 1:
-          await this.pool[decode.id](decode.data);
+          await this.pool[decode.id]({ type: "error", data: decode.data });
           break;
         case 2:
-          await this.pool[decode.id](decode.data);
+          await this.pool[decode.id]({ type: "data", data: decode.data });
           return;
       }
 
@@ -49,7 +54,7 @@ export class PlaygroundManager {
     name: string,
     deps: Record<string, string>,
     content: string,
-    callback: Handler,
+    callback: Handler
   ) {
     const id = await generate();
     const packet = JSON.stringify({
