@@ -1,6 +1,12 @@
+<div align="center">
+
+![banner](.github/assets/banner.webp)
+
 # Erland TypeScript
 
 TypeScript client for Erland.
+
+</div>
 
 ## Usage
 
@@ -74,3 +80,13 @@ manager.delete('example', (response) => {
   }
 });
 ```
+
+## Contributing
+
+You can always report bugs and request features via [GitHub Issues](/issues).
+
+For pull requests, make sure your code is well-formatted and at least can explain itself.
+
+## License
+
+Erland.ts is licensed under the MIT License.
