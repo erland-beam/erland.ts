@@ -32,5 +32,11 @@ jobs:
       - name: Build project
         run: npm run build
 
+      - name: Set up Erland Server
+        run: |
+          docker run -d -p 8080:8080 \
+          meppu/erland:main
+
       - name: Run tests
+        timeout-minutes: 1
         run: npm test
