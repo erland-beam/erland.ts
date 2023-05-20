@@ -8,15 +8,20 @@
   "files": [
     "dist"
   ],
+  "author": "meppu <npm@meppu.boo>",
+  "license": "MIT",
+  "keywords": [
+    "erland",
+    "websocket",
+    "beam",
+    "erlang",
+    "elixir"
+  ],
   "scripts": {
     "build": "tsup src/index.ts",
     "prettier": "prettier -c .",
     "test": "vitest --run"
   },
-  "author": "meppu <npm@meppu.boo>",
-  "license": "MIT",
-  "main": "index.js",
-  "keywords": [],
   "devDependencies": {
     "@types/ws": "^8.5.4",
     "prettier": "^2.8.8",
@@ -26,5 +31,8 @@
   },
   "dependencies": {
     "ws": "^8.13.0"
+  },
+  "engines": {
+    "node": ">=16.20"
   }
 }

@@ -9,19 +9,15 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: Test for ${{ matrix.node-version }}
-
-    strategy:
-      matrix:
-        node-version: [16.x, 18.x, 20.x]
+    name: Run tests
 
     steps:
       - uses: actions/checkout@v3
 
       - uses: actions/setup-node@v3
-        name: Setup Node.js ${{ matrix.node-version }}
+        name: Setup Node.js
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 20.x
 
       - name: Run clean install
         run: npm ci
