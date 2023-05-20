@@ -1,0 +1,30 @@
+{
+  "name": "erland.ts",
+  "version": "0.1.0",
+  "description": "TypeScript client for Erland",
+  "type": "module",
+  "types": "./dist/index.d.ts",
+  "exports": "./dist/index.js",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "prepack": "tsup src/index.ts",
+    "build": "tsup src/index.ts",
+    "build:watch": "tsup src/index.ts --watch",
+    "prettier": "prettier -c ."
+  },
+  "author": "meppu <npm@meppu.boo>",
+  "license": "MIT",
+  "main": "index.js",
+  "keywords": [],
+  "devDependencies": {
+    "@types/ws": "^8.5.4",
+    "prettier": "^2.8.8",
+    "tsup": "^6.7.0",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "ws": "^8.13.0"
+  }
+}
