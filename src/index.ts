@@ -109,12 +109,12 @@ export class PlaygroundManager {
   }
 
   /**
-   * Delete playground.
+   * Remove playground.
    *
    * @param name - Name of the playground
    * @param callback - Callback for response
    */
-  public delete(name: string, callback: MessageHandler) {
+  public remove(name: string, callback: MessageHandler) {
     const id = generate();
     const packet: PlaygroundRequest = {
       id,
