@@ -31,7 +31,7 @@ manager.create('example', 'erlang', (response) => {
 
 ```typescript
 // Dependencies to use (playground uses hex.pm)
-const deps = {
+const dependencies = {
   surreal: 'v1.0.0',
 };
 
@@ -42,7 +42,7 @@ main(_Args) ->
 `;
 
 // Set our file content and dependencies.
-manager.update('example', deps, content, (response) => {
+manager.update('example', content, dependencies, (response) => {
   if (response.type === 'error') {
     console.error('Found error:', response.data);
   }

@@ -1,7 +1,9 @@
 /**
  * Message handler function.
  */
-export type MessageHandler = (response: PlaygroundResponse) => void;
+export type MessageHandler = (
+  response: PlaygroundResponse
+) => void | Promise<void>;
 
 /**
  * Type for message request.
