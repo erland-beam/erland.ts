@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { PlaygroundManager } from '../dist';
+import { PlaygroundManager } from '../src';
 
 describe('Erlang playground', async () => {
   const manager = new PlaygroundManager('ws://localhost:8080/');
