@@ -30,11 +30,3 @@ jobs:
         run: npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish to GitHub Packages
-        run: |
-          sed -i 's|\(registry=\).*|\1https://npm.pkg.github.com|g' .npmrc
-          npm publish --access public --provenance
-        env:
-          NODE_AUTH_TOKEN: ${{ github.token }}
-          NPM_CONFIG_SCOPE: '@erland-beam'
