@@ -2,28 +2,30 @@
   "name": "erland.ts",
   "version": "0.1.0",
   "description": "TypeScript client for Erland",
-  "type": "module",
-  "types": "dist/index.d.ts",
-  "module": "dist/index.js",
-  "main": "dist/index.cjs",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "module": "./dist/index.js",
-      "main": "./dist/index.cjs"
-    }
-  },
-  "files": [
-    "dist"
-  ],
-  "author": "meppu <npm@meppu.boo>",
-  "license": "MIT",
   "keywords": [
     "erland",
     "websocket",
     "beam",
     "erlang",
     "elixir"
+  ],
+  "license": "MIT",
+  "author": "meppu <npm@meppu.boo>",
+  "contributors": [
+    "tuhana <npm@tuhana.me> (https://tuhana.me)"
+  ],
+  "exports": {
+    ".": {
+      "module": "./dist/index.js",
+      "main": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
   ],
   "scripts": {
     "build": "tsup src/index.ts",
@@ -32,15 +34,15 @@
     "prettier": "prettier -c .",
     "prepack": "npm run build"
   },
+  "dependencies": {
+    "ws": "^8.13.0"
+  },
   "devDependencies": {
     "@types/ws": "^8.5.4",
     "prettier": "^2.8.8",
     "tsup": "^6.7.0",
     "typescript": "^5.0.4",
     "vitest": "^0.31.1"
-  },
-  "dependencies": {
-    "ws": "^8.13.0"
   },
   "engines": {
     "node": ">=16.20"
