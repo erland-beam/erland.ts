@@ -22,12 +22,6 @@ jobs:
           node-version: latest
           cache: npm
 
-      - name: Generate changelog
-        continue-on-error: true
-        run: npx changelogithub
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
       - name: Clean install packages
         run: npm ci
 
