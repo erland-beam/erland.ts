@@ -46,7 +46,7 @@ export class PlaygroundManager {
     env: 'erlang' | 'elixir',
     callback: MessageHandler
   ) {
-    const callbackId = generate();
+    const callbackId = generateId();
     const packet: PlaygroundRequest = {
       id: callbackId,
       message: {
@@ -63,7 +63,6 @@ export class PlaygroundManager {
     while (this._pool.get(callbackId)) {
       await setTimeout(100);
     }
-
     return Promise.resolve(true);
   }
 
@@ -82,7 +81,7 @@ export class PlaygroundManager {
     dependencies: Record<string, string>,
     callback: MessageHandler
   ) {
-    const callbackId = generate();
+    const callbackId = generateId();
     const packet: PlaygroundRequest = {
       id: callbackId,
       message: {
@@ -100,7 +99,6 @@ export class PlaygroundManager {
     while (this._pool.get(callbackId)) {
       await setTimeout(100);
     }
-
     return Promise.resolve(true);
   }
 
@@ -112,7 +110,7 @@ export class PlaygroundManager {
    * @returns When all callbacks are executed
    */
   public async run(name: string, callback: MessageHandler) {
-    const callbackId = generate();
+    const callbackId = generateId();
     const packet: PlaygroundRequest = {
       id: callbackId,
       message: {
@@ -126,7 +124,6 @@ export class PlaygroundManager {
     while (this._pool.get(callbackId)) {
       await setTimeout(100);
     }
-
     return Promise.resolve(true);
   }
 
@@ -138,7 +135,7 @@ export class PlaygroundManager {
    * @returns When all callbacks are executed
    */
   public async remove(name: string, callback: MessageHandler) {
-    const callbackId = generate();
+    const callbackId = generateId();
     const packet: PlaygroundRequest = {
       id: callbackId,
       message: {
@@ -152,7 +149,6 @@ export class PlaygroundManager {
     while (this._pool.get(callbackId)) {
       await setTimeout(100);
     }
-
     return Promise.resolve(true);
   }
 
@@ -165,11 +161,9 @@ export class PlaygroundManager {
   }
 }
 
-function generate(): string {
+function generateId(): string {
   return Array(12)
     .fill(0)
-    .map((_) => {
-      return Math.ceil(Math.random() * 35).toString(36);
-    })
+    .map(() => Math.ceil(Math.random() * 35).toString(36))
     .join('');
 }
