@@ -25,7 +25,7 @@ jobs:
       - name: Generate changelog
         continue-on-error: true
         run: npx changelogithub
-        with:
+        env:
           GITHUB_TOKEN: ${{ github.token }}
 
       - name: Clean install packages
