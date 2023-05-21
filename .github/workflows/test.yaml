@@ -29,8 +29,7 @@ jobs:
         run: npm run build
 
       - name: Set up Erland Server
-        run: |
-          docker run -d -p 8080:8080 meppu/erland:main
+        run: docker run -d -p 8080:8080 meppu/erland:main
 
       # Container is not ready for connection
       # sometimes, so we sleep a bit to make sure.
