@@ -21,6 +21,7 @@ jobs:
         with:
           node-version: latest
           cache: npm
+          registry-url: https://registry.npmjs.org
 
       - name: Clean install packages
         run: npm ci
@@ -29,11 +30,11 @@ jobs:
         run: npm publish --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_REGISTRY: 'https://registry.npmjs.org'
 
       - name: Publish to GitHub Packages
-        run: npm publish --access public --provenance
+        run: |
+          sed -i 's|\(registry=\).*|\1https://npm.pkg.github.com|g' .npmrc
+          npm publish --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ github.token }}
-          NPM_CONFIG_REGISTRY: https://npm.pkg.github.com
           NPM_CONFIG_SCOPE: '@erland-beam'
