@@ -3,8 +3,10 @@ import { setTimeout } from 'node:timers/promises';
 import type {
   MessageHandler,
   PlaygroundResponse,
-  PlaygroundRequest,
   PlaygroundManagerOptions,
+  PlaygroundEvents,
+  PlaygroundMessage,
+  PlaygroundPacket,
 } from './types';
 
 export class PlaygroundManager {
@@ -52,26 +54,11 @@ export class PlaygroundManager {
     env: 'erlang' | 'elixir',
     callback: MessageHandler
   ) {
-    const callbackId = generateId();
-    const packet: PlaygroundRequest = {
-      id: callbackId,
-      message: {
-        create: {
-          name,
-          env,
-        },
-      },
-    };
-
-    this._pool.set(callbackId, callback);
-    this._websocket.send(JSON.stringify(packet));
-
-    this._websocket.onmessage;
-
-    while (this._pool.get(callbackId)) {
-      await setTimeout(this._options.loopInterval);
-    }
-    return Promise.resolve(true);
+    const packet = this._createPacket('create', generateId(), {
+      env,
+      name,
+    });
+    return await this._sendPacket(packet, callback);
   }
 
   /**
@@ -89,25 +76,12 @@ export class PlaygroundManager {
     dependencies: Record<string, string>,
     callback: MessageHandler
   ) {
-    const callbackId = generateId();
-    const packet: PlaygroundRequest = {
-      id: callbackId,
-      message: {
-        update: {
-          name,
-          dependencies,
-          content,
-        },
-      },
-    };
-
-    this._pool.set(callbackId, callback);
-    this._websocket.send(JSON.stringify(packet));
-
-    while (this._pool.get(callbackId)) {
-      await setTimeout(this._options.loopInterval);
-    }
-    return Promise.resolve(true);
+    const packet = this._createPacket('update', generateId(), {
+      name,
+      dependencies,
+      content,
+    });
+    return await this._sendPacket(packet, callback);
   }
 
   /**
@@ -118,21 +92,8 @@ export class PlaygroundManager {
    * @returns When all callbacks are executed
    */
   public async run(name: string, callback: MessageHandler) {
-    const callbackId = generateId();
-    const packet: PlaygroundRequest = {
-      id: callbackId,
-      message: {
-        run: name,
-      },
-    };
-
-    this._pool.set(callbackId, callback);
-    this._websocket.send(JSON.stringify(packet));
-
-    while (this._pool.get(callbackId)) {
-      await setTimeout(this._options.loopInterval);
-    }
-    return Promise.resolve(true);
+    const packet = this._createPacket('run', generateId(), name);
+    return await this._sendPacket(packet, callback);
   }
 
   /**
@@ -143,21 +104,8 @@ export class PlaygroundManager {
    * @returns When all callbacks are executed
    */
   public async remove(name: string, callback: MessageHandler) {
-    const callbackId = generateId();
-    const packet: PlaygroundRequest = {
-      id: callbackId,
-      message: {
-        remove: name,
-      },
-    };
-
-    this._pool.set(callbackId, callback);
-    this._websocket.send(JSON.stringify(packet));
-
-    while (this._pool.get(callbackId)) {
-      await setTimeout(this._options.loopInterval);
-    }
-    return Promise.resolve(true);
+    const packet = this._createPacket('remove', generateId(), name);
+    return await this._sendPacket(packet, callback);
   }
 
   /**
@@ -166,6 +114,43 @@ export class PlaygroundManager {
   public close() {
     this._websocket.close();
     this._pool.clear();
+  }
+
+  /**
+   * Generate a packet JSON.
+   * @param event - {@link PlaygroundEvents}
+   * @param callbackId - Callback id
+   * @param payload - {@link PlaygroundPacket}
+   * @returns Generated packet
+   */
+  private _createPacket<T extends PlaygroundEvents>(
+    event: T,
+    callbackId: string,
+    payload: PlaygroundMessage<T>
+  ): PlaygroundPacket<T> {
+    return {
+      id: callbackId,
+      message: { [event]: payload } as { [E in T]: PlaygroundMessage<T> },
+    };
+  }
+
+  /**
+   * Send packet to the playground.
+   * @param packet - {@link PlaygroundPacket}
+   * @param callback - Callback for response
+   * @returns When all callbacks are executed
+   */
+  private async _sendPacket<T extends PlaygroundEvents>(
+    packet: PlaygroundPacket<T>,
+    callback: MessageHandler
+  ) {
+    this._pool.set(packet.id, callback);
+    this._websocket.send(JSON.stringify(packet));
+
+    while (this._pool.get(packet.id)) {
+      await setTimeout(100);
+    }
+    return Promise.resolve(true);
   }
 }
 

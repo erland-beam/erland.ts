@@ -1,4 +1,4 @@
-import { PlaygroundManager } from ".";
+import { PlaygroundManager } from '.';
 
 /**
  * Options for {@link PlaygroundManager}.
@@ -7,8 +7,8 @@ export type PlaygroundManagerOptions = {
   /**
    * Loop interval for {@link PlaygroundManager.create}, {@link PlaygroundManager.update}, {@link PlaygroundManager.run} and {@link PlaygroundManager.remove}.
    */
-  loopInterval: number
-}
+  loopInterval: number;
+};
 
 /**
  * Message handler function.
@@ -20,50 +20,57 @@ export type MessageHandler = (
 /**
  * Type for message request.
  */
-export interface PlaygroundRequest {
-  id: String;
-  message: PlaygroundMessage;
+export interface PlaygroundPacket<T extends PlaygroundEvents> {
+  id: string;
+  message: {
+    [E in T]: PlaygroundMessage<T>;
+  };
 }
+
+/**
+ * Playground class functions.
+ */
+export type PlaygroundEvents = 'create' | 'update' | 'run' | 'remove';
 
 /**
  * Union type to combine all playground request messages.
  */
-export type PlaygroundMessage =
-  | PlaygroundCreateMessage
-  | PlaygroundUpdateMessage
-  | PlaygroundRunMessage
-  | PlaygroundRemoveMessage;
+export type PlaygroundMessage<T extends PlaygroundEvents> = T extends 'create'
+  ? PlaygroundCreateMessage
+  : T extends 'update'
+  ? PlaygroundUpdateMessage
+  : T extends 'run'
+  ? PlaygroundRunMessage
+  : T extends 'remove'
+  ? PlaygroundRemoveMessage
+  : never;
 
 /**
  * Create message type for playground.
  */
 export type PlaygroundCreateMessage = {
-  create: {
-    name: string;
-    env: 'erlang' | 'elixir';
-  };
+  name: string;
+  env: 'erlang' | 'elixir';
 };
 
 /**
  * Update message type for playground.
  */
 export type PlaygroundUpdateMessage = {
-  update: {
-    name: string;
-    content: string;
-    dependencies: Record<string, string>;
-  };
+  name: string;
+  content: string;
+  dependencies: Record<string, string>;
 };
 
 /**
  * Run message type for playground.
  */
-export type PlaygroundRunMessage = { run: string };
+export type PlaygroundRunMessage = string;
 
 /**
  * Remove message type for playground.
  */
-export type PlaygroundRemoveMessage = { remove: string };
+export type PlaygroundRemoveMessage = string;
 
 /**
  * Response type for playground.
