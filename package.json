@@ -9,6 +9,7 @@
     "erlang",
     "elixir"
   ],
+  "repository": "git+https://github.com/erland-beam/erland.ts",
   "license": "MIT",
   "author": "meppu <npm@meppu.boo>",
   "maintainers": [
@@ -29,10 +30,10 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts",
-    "watch": "tsup src/index.ts --watch",
-    "test": "vitest --run",
+    "prepack": "npm run build",
     "prettier": "prettier -c .",
-    "prepack": "npm run build"
+    "test": "vitest --run",
+    "watch": "tsup src/index.ts --watch"
   },
   "dependencies": {
     "ws": "^8.13.0"
