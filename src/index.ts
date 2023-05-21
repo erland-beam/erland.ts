@@ -1,4 +1,5 @@
 import { WebSocket } from 'ws';
+import { setTimeout } from 'node:timers/promises';
 import type {
   MessageHandler,
   PlaygroundResponse,
@@ -28,7 +29,7 @@ export class PlaygroundManager {
    */
   public async wait() {
     while (this._websocket.readyState !== 1) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await setTimeout(100);
     }
   }
 
