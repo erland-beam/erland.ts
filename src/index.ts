@@ -5,8 +5,6 @@ import type {
   PlaygroundRequest,
 } from './types';
 
-export type { PlaygroundResponse, MessageHandler } from './types';
-
 export class PlaygroundManager {
   private _websocket: WebSocket;
   private _pool: Record<string, MessageHandler>;
