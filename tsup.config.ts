@@ -1,8 +1,8 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-  format: 'esm',
-  target: 'esnext',
+  format: ['esm', 'cjs'],
+  target: 'node16',
   skipNodeModulesBundle: true,
   clean: true,
   dts: true,
