@@ -4,14 +4,14 @@ on:
   push:
     tags: [v*]
 
-permissions:
-  contents: write
-  id-token: write
-
 jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@v3
@@ -37,5 +37,6 @@ jobs:
       - name: Publish to GitHub Packages
         run: npm publish --provenance
         env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
           NPM_CONFIG_REGISTRY: https://npm.pkg.github.com
           NPM_CONFIG_SCOPE: '@erland-beam'
