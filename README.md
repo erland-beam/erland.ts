@@ -68,11 +68,11 @@ manager.run('example', (response) => {
 });
 ```
 
-### Delete Playground
+### Remove Playground
 
 ```typescript
 // Tries to remove playground
-manager.delete('example', (response) => {
+manager.remove('example', (response) => {
   if (response.type === 'error') {
     console.log('Found error:', response.data);
   } else {
