@@ -4,13 +4,19 @@ import type {
   MessageHandler,
   PlaygroundResponse,
   PlaygroundRequest,
+  PlaygroundManagerOptions,
 } from './types';
 
 export class PlaygroundManager {
+  private _options: PlaygroundManagerOptions;
   private _websocket: WebSocket;
   private _pool: Map<string, MessageHandler>;
 
-  constructor(url: string) {
+  constructor(
+    url: string,
+    options: PlaygroundManagerOptions = { loopInterval: 200 }
+  ) {
+    this._options = options;
     this._websocket = new WebSocket(url);
     this._pool = new Map();
 
@@ -29,7 +35,7 @@ export class PlaygroundManager {
    */
   public async wait() {
     while (this._websocket.readyState !== 1) {
-      await setTimeout(100);
+      await setTimeout(this._options.loopInterval);
     }
   }
 
@@ -60,8 +66,10 @@ export class PlaygroundManager {
     this._pool.set(callbackId, callback);
     this._websocket.send(JSON.stringify(packet));
 
+    this._websocket.onmessage;
+
     while (this._pool.get(callbackId)) {
-      await setTimeout(100);
+      await setTimeout(this._options.loopInterval);
     }
     return Promise.resolve(true);
   }
@@ -97,7 +105,7 @@ export class PlaygroundManager {
     this._websocket.send(JSON.stringify(packet));
 
     while (this._pool.get(callbackId)) {
-      await setTimeout(100);
+      await setTimeout(this._options.loopInterval);
     }
     return Promise.resolve(true);
   }
@@ -122,7 +130,7 @@ export class PlaygroundManager {
     this._websocket.send(JSON.stringify(packet));
 
     while (this._pool.get(callbackId)) {
-      await setTimeout(100);
+      await setTimeout(this._options.loopInterval);
     }
     return Promise.resolve(true);
   }
@@ -147,7 +155,7 @@ export class PlaygroundManager {
     this._websocket.send(JSON.stringify(packet));
 
     while (this._pool.get(callbackId)) {
-      await setTimeout(100);
+      await setTimeout(this._options.loopInterval);
     }
     return Promise.resolve(true);
   }

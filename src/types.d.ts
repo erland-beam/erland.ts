@@ -1,3 +1,15 @@
+import { PlaygroundManager } from ".";
+
+/**
+ * Options for {@link PlaygroundManager}.
+ */
+export type PlaygroundManagerOptions = {
+  /**
+   * Loop interval for {@link PlaygroundManager.create}, {@link PlaygroundManager.update}, {@link PlaygroundManager.run} and {@link PlaygroundManager.remove}.
+   */
+  loopInterval: number
+}
+
 /**
  * Message handler function.
  */
