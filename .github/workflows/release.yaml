@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags: [v*]
+
+jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: latest
+          cache: npm
+
+      - name: Generate changelog
+        continue-on-error: true
+        run: npx changelogithub
+
+      - name: Clean install packages
+        run: npm ci
+
+      - name: Publish to NPM
+        run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish to GitHub Packages
+        run: npm publish --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ github.token }}
+          NPM_CONFIG_REGISTRY: https://npm.pkg.github.com
+          NPM_CONFIG_SCOPE: '@erland-beam'
