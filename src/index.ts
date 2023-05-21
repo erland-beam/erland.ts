@@ -8,18 +8,18 @@ import type {
 
 export class PlaygroundManager {
   private _websocket: WebSocket;
-  private _pool: Record<string, MessageHandler>;
+  private _pool: Map<string, MessageHandler>;
 
   constructor(url: string) {
     this._websocket = new WebSocket(url);
-    this._pool = {};
+    this._pool = new Map();
 
     this._websocket.onmessage = async ({ data }) => {
       const response: PlaygroundResponse = JSON.parse(data.toString());
-      this._pool[response.id](response);
+      this._pool.get(response.id)(response);
 
       if (response.type != 'data') {
-        delete this._pool[response.id];
+        this._pool.delete(response.id);
       }
     };
   }
@@ -56,7 +56,7 @@ export class PlaygroundManager {
       },
     };
 
-    this._pool[id] = callback;
+    this._pool.set(id, callback);
     this._websocket.send(JSON.stringify(packet));
   }
 
@@ -86,7 +86,7 @@ export class PlaygroundManager {
       },
     };
 
-    this._pool[id] = callback;
+    this._pool.set(id, callback)
     this._websocket.send(JSON.stringify(packet));
   }
 
@@ -105,7 +105,7 @@ export class PlaygroundManager {
       },
     };
 
-    this._pool[id] = callback;
+    this._pool.set(id, callback);
     this._websocket.send(JSON.stringify(packet));
   }
 
@@ -124,7 +124,7 @@ export class PlaygroundManager {
       },
     };
 
-    this._pool[id] = callback;
+    this._pool.set(id, callback);
     this._websocket.send(JSON.stringify(packet));
   }
 
@@ -133,7 +133,7 @@ export class PlaygroundManager {
    */
   public close() {
     this._websocket.close();
-    this._pool = {};
+    this._pool.clear();
   }
 }
 
