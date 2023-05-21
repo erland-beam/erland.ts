@@ -16,9 +16,9 @@ export class PlaygroundManager {
 
     this._websocket.onmessage = async ({ data }) => {
       const response: PlaygroundResponse = JSON.parse(data.toString());
-      this._pool.get(response.id)(response);
 
-      if (response.type != 'data') {
+      this._pool.get(response.id)(response);
+      if (response.type !== 'data') {
         this._pool.delete(response.id);
       }
     };
@@ -39,15 +39,16 @@ export class PlaygroundManager {
    * @param name - Name of the playground
    * @param language - Playground language
    * @param callback - Callback for response
+   * @returns When all callbacks are executed
    */
-  public create(
+  public async create(
     name: string,
     env: 'erlang' | 'elixir',
     callback: MessageHandler
   ) {
-    const id = generate();
+    const callbackId = generate();
     const packet: PlaygroundRequest = {
-      id,
+      id: callbackId,
       message: {
         create: {
           name,
@@ -56,8 +57,14 @@ export class PlaygroundManager {
       },
     };
 
-    this._pool.set(id, callback);
+    this._pool.set(callbackId, callback);
     this._websocket.send(JSON.stringify(packet));
+
+    while (this._pool.get(callbackId)) {
+      await setTimeout(100);
+    }
+
+    return Promise.resolve(true);
   }
 
   /**
@@ -67,16 +74,17 @@ export class PlaygroundManager {
    * @param content - Playground file content
    * @param deps - Dependencies as `name: version`
    * @param callback - Callback for response
+   * @returns When all callbacks are executed
    */
-  public update(
+  public async update(
     name: string,
     content: string,
     dependencies: Record<string, string>,
     callback: MessageHandler
   ) {
-    const id = generate();
+    const callbackId = generate();
     const packet: PlaygroundRequest = {
-      id,
+      id: callbackId,
       message: {
         update: {
           name,
@@ -86,8 +94,14 @@ export class PlaygroundManager {
       },
     };
 
-    this._pool.set(id, callback)
+    this._pool.set(callbackId, callback);
     this._websocket.send(JSON.stringify(packet));
+
+    while (this._pool.get(callbackId)) {
+      await setTimeout(100);
+    }
+
+    return Promise.resolve(true);
   }
 
   /**
@@ -95,18 +109,25 @@ export class PlaygroundManager {
    *
    * @param name - Name of the playground
    * @param callback - Callback for response
+   * @returns When all callbacks are executed
    */
-  public run(name: string, callback: MessageHandler) {
-    const id = generate();
+  public async run(name: string, callback: MessageHandler) {
+    const callbackId = generate();
     const packet: PlaygroundRequest = {
-      id,
+      id: callbackId,
       message: {
         run: name,
       },
     };
 
-    this._pool.set(id, callback);
+    this._pool.set(callbackId, callback);
     this._websocket.send(JSON.stringify(packet));
+
+    while (this._pool.get(callbackId)) {
+      await setTimeout(100);
+    }
+
+    return Promise.resolve(true);
   }
 
   /**
@@ -114,18 +135,25 @@ export class PlaygroundManager {
    *
    * @param name - Name of the playground
    * @param callback - Callback for response
+   * @returns When all callbacks are executed
    */
-  public remove(name: string, callback: MessageHandler) {
-    const id = generate();
+  public async remove(name: string, callback: MessageHandler) {
+    const callbackId = generate();
     const packet: PlaygroundRequest = {
-      id,
+      id: callbackId,
       message: {
         remove: name,
       },
     };
 
-    this._pool.set(id, callback);
+    this._pool.set(callbackId, callback);
     this._websocket.send(JSON.stringify(packet));
+
+    while (this._pool.get(callbackId)) {
+      await setTimeout(100);
+    }
+
+    return Promise.resolve(true);
   }
 
   /**
