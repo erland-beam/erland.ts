@@ -27,8 +27,9 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts",
-    "prettier": "prettier -c .",
+    "watch": "tsup src/index.ts --watch",
     "test": "vitest --run",
+    "prettier": "prettier -c .",
     "prepack": "npm run build"
   },
   "devDependencies": {

@@ -3,23 +3,31 @@ import { setTimeout } from 'node:timers/promises';
 import type {
   MessageHandler,
   PlaygroundResponse,
-  PlaygroundRequest,
+  PlaygroundManagerOptions,
+  PlaygroundEvents,
+  PlaygroundMessage,
+  PlaygroundPacket,
 } from './types';
 
 export class PlaygroundManager {
+  private _options: PlaygroundManagerOptions;
   private _websocket: WebSocket;
-  private _pool: Record<string, MessageHandler>;
+  private _pool: Map<string, MessageHandler>;
 
-  constructor(url: string) {
+  constructor(
+    url: string,
+    options: PlaygroundManagerOptions = { loopInterval: 200 }
+  ) {
+    this._options = options;
     this._websocket = new WebSocket(url);
-    this._pool = {};
+    this._pool = new Map();
 
     this._websocket.onmessage = async ({ data }) => {
       const response: PlaygroundResponse = JSON.parse(data.toString());
-      this._pool[response.id](response);
 
-      if (response.type != 'data') {
-        delete this._pool[response.id];
+      this._pool.get(response.id)(response);
+      if (response.type !== 'data') {
+        this._pool.delete(response.id);
       }
     };
   }
@@ -29,7 +37,7 @@ export class PlaygroundManager {
    */
   public async wait() {
     while (this._websocket.readyState !== 1) {
-      await setTimeout(100);
+      await setTimeout(this._options.loopInterval);
     }
   }
 
@@ -39,25 +47,18 @@ export class PlaygroundManager {
    * @param name - Name of the playground
    * @param language - Playground language
    * @param callback - Callback for response
+   * @returns When all callbacks are executed
    */
-  public create(
+  public async create(
     name: string,
     env: 'erlang' | 'elixir',
     callback: MessageHandler
   ) {
-    const id = generate();
-    const packet: PlaygroundRequest = {
-      id,
-      message: {
-        create: {
-          name,
-          env,
-        },
-      },
-    };
-
-    this._pool[id] = callback;
-    this._websocket.send(JSON.stringify(packet));
+    const packet = this._createPacket('create', generateId(), {
+      env,
+      name,
+    });
+    return await this._sendPacket(packet, callback);
   }
 
   /**
@@ -67,27 +68,20 @@ export class PlaygroundManager {
    * @param content - Playground file content
    * @param deps - Dependencies as `name: version`
    * @param callback - Callback for response
+   * @returns When all callbacks are executed
    */
-  public update(
+  public async update(
     name: string,
     content: string,
     dependencies: Record<string, string>,
     callback: MessageHandler
   ) {
-    const id = generate();
-    const packet: PlaygroundRequest = {
-      id,
-      message: {
-        update: {
-          name,
-          dependencies,
-          content,
-        },
-      },
-    };
-
-    this._pool[id] = callback;
-    this._websocket.send(JSON.stringify(packet));
+    const packet = this._createPacket('update', generateId(), {
+      name,
+      dependencies,
+      content,
+    });
+    return await this._sendPacket(packet, callback);
   }
 
   /**
@@ -95,18 +89,11 @@ export class PlaygroundManager {
    *
    * @param name - Name of the playground
    * @param callback - Callback for response
+   * @returns When all callbacks are executed
    */
-  public run(name: string, callback: MessageHandler) {
-    const id = generate();
-    const packet: PlaygroundRequest = {
-      id,
-      message: {
-        run: name,
-      },
-    };
-
-    this._pool[id] = callback;
-    this._websocket.send(JSON.stringify(packet));
+  public async run(name: string, callback: MessageHandler) {
+    const packet = this._createPacket('run', generateId(), name);
+    return await this._sendPacket(packet, callback);
   }
 
   /**
@@ -114,18 +101,11 @@ export class PlaygroundManager {
    *
    * @param name - Name of the playground
    * @param callback - Callback for response
+   * @returns When all callbacks are executed
    */
-  public remove(name: string, callback: MessageHandler) {
-    const id = generate();
-    const packet: PlaygroundRequest = {
-      id,
-      message: {
-        remove: name,
-      },
-    };
-
-    this._pool[id] = callback;
-    this._websocket.send(JSON.stringify(packet));
+  public async remove(name: string, callback: MessageHandler) {
+    const packet = this._createPacket('remove', generateId(), name);
+    return await this._sendPacket(packet, callback);
   }
 
   /**
@@ -133,15 +113,50 @@ export class PlaygroundManager {
    */
   public close() {
     this._websocket.close();
-    this._pool = {};
+    this._pool.clear();
+  }
+
+  /**
+   * Generate a packet JSON.
+   * @param event - {@link PlaygroundEvents}
+   * @param callbackId - Callback id
+   * @param payload - {@link PlaygroundPacket}
+   * @returns Generated packet
+   */
+  private _createPacket<T extends PlaygroundEvents>(
+    event: T,
+    callbackId: string,
+    payload: PlaygroundMessage<T>
+  ): PlaygroundPacket<T> {
+    return {
+      id: callbackId,
+      message: { [event]: payload } as { [E in T]: PlaygroundMessage<T> },
+    };
+  }
+
+  /**
+   * Send packet to the playground.
+   * @param packet - {@link PlaygroundPacket}
+   * @param callback - Callback for response
+   * @returns When all callbacks are executed
+   */
+  private async _sendPacket<T extends PlaygroundEvents>(
+    packet: PlaygroundPacket<T>,
+    callback: MessageHandler
+  ) {
+    this._pool.set(packet.id, callback);
+    this._websocket.send(JSON.stringify(packet));
+
+    while (this._pool.get(packet.id)) {
+      await setTimeout(100);
+    }
+    return Promise.resolve(true);
   }
 }
 
-function generate(): string {
+function generateId(): string {
   return Array(12)
     .fill(0)
-    .map((_) => {
-      return Math.ceil(Math.random() * 35).toString(36);
-    })
+    .map(() => Math.ceil(Math.random() * 35).toString(36))
     .join('');
 }
