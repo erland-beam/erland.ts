@@ -7,7 +7,7 @@ describe('Erlang playground', async () => {
 
   // Create playground
   test('Create', async () => {
-    await manager.create('erlang.example', 'erlang', (response) => {
+    await manager.create('erlang_example', 'erlang', (response) => {
       expect(response.type).toBe('ok');
     });
   });
@@ -15,14 +15,14 @@ describe('Erlang playground', async () => {
   // Update playground content
   test('Update', async () => {
     const content = 'main(_Args) -> io:format("WoW!~n").';
-    await manager.update('erlang.example', content, {}, (response) => {
+    await manager.update('erlang_example', content, {}, (response) => {
       expect(response.type).toBe('ok');
     });
   });
 
   // Run playground
   test('Run', async () => {
-    await manager.run('erlang.example', (response) => {
+    await manager.run('erlang_example', (response) => {
       if (response.type == 'data') {
         if (!response.data?.startsWith('===>')) {
           expect(response.data).toBe('WoW!');
@@ -35,7 +35,7 @@ describe('Erlang playground', async () => {
 
   // Remove playground
   test('Remove', async () => {
-    manager.remove('erlang.example', (response) => {
+    await manager.remove('erlang_example', (response) => {
       expect(response.type).toBe('ok');
     });
   });
