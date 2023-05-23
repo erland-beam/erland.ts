@@ -43,17 +43,13 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node_version }}
+          cache: npm
 
       - name: Run clean install
         run: npm ci
 
       - name: Set up Erland Server
         run: docker run -d -p 8080:8080 meppu/erland:main
-
-      # Container is not ready for connection
-      # sometimes, so we sleep a bit to make sure.
-      - name: Sleep for 5 seconds
-        run: sleep 5
 
       - name: Run tests
         run: npm test
