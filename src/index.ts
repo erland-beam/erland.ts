@@ -148,8 +148,9 @@ export class PlaygroundManager {
     this._websocket.send(JSON.stringify(packet));
 
     while (this._pool.get(packet.id)) {
-      await setTimeout(100);
+      await setTimeout(this._options.loopInterval);
     }
+
     return Promise.resolve(true);
   }
 }
