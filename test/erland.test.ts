@@ -3,7 +3,7 @@ import { PlaygroundManager } from '../src';
 
 describe('Erlang playground', async () => {
   const manager = new PlaygroundManager('ws://localhost:8080/');
-  await manager.wait();
+  await manager.connect();
 
   test(
     'Create a playground',

@@ -10,6 +10,7 @@ import type {
 } from './types';
 
 export class PlaygroundManager {
+  private _url: string;
   private _options: PlaygroundManagerOptions;
   private _websocket: WebSocket;
   private _pool: Map<string, MessageHandler>;
@@ -18,24 +19,27 @@ export class PlaygroundManager {
     url: string,
     options: PlaygroundManagerOptions = { loopInterval: 200 }
   ) {
+    this._url = url;
     this._options = options;
-    this._websocket = new WebSocket(url);
+    this._websocket = null;
     this._pool = new Map();
+  }
 
-    this._websocket.onmessage = async ({ data }) => {
+  /**
+   * Connect to the playground.
+   * @param url - URL of the playground. Defaults to the URL entered into {@link PlaygroundManager}
+   */
+  public async connect(url = this._url) {
+    this._websocket = new WebSocket(url);
+    this._websocket.addEventListener("message", async ({ data }) => {
       const response: PlaygroundResponse = JSON.parse(data.toString());
 
       this._pool.get(response.id)(response);
       if (response.type !== 'data') {
-        this._pool.delete(response.id);
+        this._pool.delete(response.id)
       }
-    };
-  }
+    })
 
-  /**
-   * Wait until connection is ready to use.
-   */
-  public async wait() {
     while (this._websocket.readyState !== 1) {
       await setTimeout(this._options.loopInterval);
     }
