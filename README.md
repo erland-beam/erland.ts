@@ -15,17 +15,19 @@ _You can also define async callbacks._
 ### Start Connection
 
 ```typescript
-// start connection
+// Construct the playground manager
 const manager = new PlaygroundManager('ws://localhost:8080/');
 
-// wait connection to be ready
-await manager.wait();
+// Connect to the playground and wait until
+// playground is ready to receive messages
+await manager.connect();
 ```
 
 ### Create Playground
 
 ```typescript
-// Creates new playground named "example" for Erlang programming language. If it gives an error, returns error as string.
+// Creates new playground named "example" for Erlang programming
+// language. If it gives an error, returns it as a string
 manager.create('example', 'erlang', (response) => {
   if (response.type === 'error') {
     console.error('Found error:', response.data);
@@ -41,13 +43,10 @@ const dependencies = {
   surreal: 'v1.0.0',
 };
 
-// File content (for Erlang, `main` is where program actually runs).
-const content = `
-main(_Args) ->
-  io:format("WoW!~n").
-`;
+// Create a file content
+const content = 'main(_Args) -> io:format("WoW!~n").';
 
-// Set our file content and dependencies.
+// Set our file content and dependencies
 manager.update('example', content, dependencies, (response) => {
   if (response.type === 'error') {
     console.error('Found error:', response.data);
