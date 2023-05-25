@@ -1,6 +1,6 @@
 {
   "name": "erland.ts",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "TypeScript client for Erland",
   "keywords": [
     "erland",
@@ -17,13 +17,13 @@
   ],
   "exports": {
     ".": {
-      "module": "./dist/index.js",
-      "main": "./dist/index.cjs",
+      "main": "./dist/index.js",
+      "module": "./dist/index.mjs",
       "types": "./dist/index.d.ts"
     }
   },
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
