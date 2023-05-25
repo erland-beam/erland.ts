@@ -1,9 +1,11 @@
 import { describe, expect, test } from 'vitest';
 import { PlaygroundManager } from '../src';
 
+const TEST_TIMEOUT = 12 * 1000;
+
 describe('Erlang playground', async () => {
   const manager = new PlaygroundManager('ws://localhost:8080/');
-  await manager.wait();
+  await manager.connect();
 
   test(
     'Create a playground',
@@ -12,7 +14,7 @@ describe('Erlang playground', async () => {
         expect(response.type).toBe('ok');
       });
     },
-    { retry: 3 }
+    TEST_TIMEOUT
   );
 
   test(
@@ -23,7 +25,7 @@ describe('Erlang playground', async () => {
         expect(response.type).toBe('ok');
       });
     },
-    { retry: 3 }
+    TEST_TIMEOUT
   );
 
   test(
@@ -39,7 +41,7 @@ describe('Erlang playground', async () => {
         }
       });
     },
-    { retry: 3 }
+    TEST_TIMEOUT
   );
 
   test(
@@ -49,7 +51,7 @@ describe('Erlang playground', async () => {
         expect(response.type).toBe('ok');
       });
     },
-    { retry: 3 }
+    TEST_TIMEOUT
   );
 });
 

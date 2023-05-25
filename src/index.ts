@@ -10,35 +10,19 @@ import type {
 } from './types';
 
 export class PlaygroundManager {
+  private _url: string | URL;
   private _options: PlaygroundManagerOptions;
   private _websocket: WebSocket;
   private _pool: Map<string, MessageHandler>;
 
   constructor(
-    url: string,
+    url: string | URL,
     options: PlaygroundManagerOptions = { loopInterval: 200 }
   ) {
+    this._url = url;
     this._options = options;
-    this._websocket = new WebSocket(url);
+    this._websocket = null;
     this._pool = new Map();
-
-    this._websocket.onmessage = async ({ data }) => {
-      const response: PlaygroundResponse = JSON.parse(data.toString());
-
-      this._pool.get(response.id)(response);
-      if (response.type !== 'data') {
-        this._pool.delete(response.id);
-      }
-    };
-  }
-
-  /**
-   * Wait until connection is ready to use.
-   */
-  public async wait() {
-    while (this._websocket.readyState !== 1) {
-      await setTimeout(this._options.loopInterval);
-    }
   }
 
   /**
@@ -106,6 +90,26 @@ export class PlaygroundManager {
   public async remove(name: string, callback: MessageHandler) {
     const packet = this._createPacket('remove', generateId(), name);
     return await this._sendPacket(packet, callback);
+  }
+
+  /**
+   * Connect to the playground.
+   * @param url - URL of the playground. Defaults to the URL entered into {@link PlaygroundManager}
+   */
+  public async connect(url = this._url) {
+    this._websocket = new WebSocket(url);
+    this._websocket.addEventListener('message', async ({ data }) => {
+      const response: PlaygroundResponse = JSON.parse(data.toString());
+
+      this._pool.get(response.id)(response);
+      if (response.type !== 'data') {
+        this._pool.delete(response.id);
+      }
+    });
+
+    while (this._websocket.readyState !== 1) {
+      await setTimeout(this._options.loopInterval);
+    }
   }
 
   /**
