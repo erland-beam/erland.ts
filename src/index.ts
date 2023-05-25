@@ -31,14 +31,14 @@ export class PlaygroundManager {
    */
   public async connect(url = this._url) {
     this._websocket = new WebSocket(url);
-    this._websocket.addEventListener("message", async ({ data }) => {
+    this._websocket.addEventListener('message', async ({ data }) => {
       const response: PlaygroundResponse = JSON.parse(data.toString());
 
       this._pool.get(response.id)(response);
       if (response.type !== 'data') {
-        this._pool.delete(response.id)
+        this._pool.delete(response.id);
       }
-    })
+    });
 
     while (this._websocket.readyState !== 1) {
       await setTimeout(this._options.loopInterval);
