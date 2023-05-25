@@ -26,26 +26,6 @@ export class PlaygroundManager {
   }
 
   /**
-   * Connect to the playground.
-   * @param url - URL of the playground. Defaults to the URL entered into {@link PlaygroundManager}
-   */
-  public async connect(url = this._url) {
-    this._websocket = new WebSocket(url);
-    this._websocket.addEventListener('message', async ({ data }) => {
-      const response: PlaygroundResponse = JSON.parse(data.toString());
-
-      this._pool.get(response.id)(response);
-      if (response.type !== 'data') {
-        this._pool.delete(response.id);
-      }
-    });
-
-    while (this._websocket.readyState !== 1) {
-      await setTimeout(this._options.loopInterval);
-    }
-  }
-
-  /**
    * Create a new playground.
    *
    * @param name - Name of the playground
@@ -110,6 +90,26 @@ export class PlaygroundManager {
   public async remove(name: string, callback: MessageHandler) {
     const packet = this._createPacket('remove', generateId(), name);
     return await this._sendPacket(packet, callback);
+  }
+
+  /**
+   * Connect to the playground.
+   * @param url - URL of the playground. Defaults to the URL entered into {@link PlaygroundManager}
+   */
+  public async connect(url = this._url) {
+    this._websocket = new WebSocket(url);
+    this._websocket.addEventListener('message', async ({ data }) => {
+      const response: PlaygroundResponse = JSON.parse(data.toString());
+
+      this._pool.get(response.id)(response);
+      if (response.type !== 'data') {
+        this._pool.delete(response.id);
+      }
+    });
+
+    while (this._websocket.readyState !== 1) {
+      await setTimeout(this._options.loopInterval);
+    }
   }
 
   /**
