@@ -10,13 +10,13 @@ import type {
 } from './types';
 
 export class PlaygroundManager {
-  private _url: string;
+  private _url: string | URL;
   private _options: PlaygroundManagerOptions;
   private _websocket: WebSocket;
   private _pool: Map<string, MessageHandler>;
 
   constructor(
-    url: string,
+    url: string | URL,
     options: PlaygroundManagerOptions = { loopInterval: 200 }
   ) {
     this._url = url;
