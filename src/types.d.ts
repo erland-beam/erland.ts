@@ -46,11 +46,16 @@ export type PlaygroundMessage<T extends PlaygroundEvents> = T extends 'create'
   : never;
 
 /**
+ * Playground languages.
+ */
+export type PlaygroundLanguages = 'erlang' | 'elixir';
+
+/**
  * Create message type for playground.
  */
 export type PlaygroundCreateMessage = {
   name: string;
-  env: 'erlang' | 'elixir';
+  language: PlaygroundLanguages;
 };
 
 /**
