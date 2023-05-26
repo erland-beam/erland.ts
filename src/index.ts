@@ -2,7 +2,6 @@ import { WebSocket } from 'ws';
 import { setTimeout } from 'node:timers/promises';
 import type {
   MessageHandler,
-  PlaygroundLanguages,
   PlaygroundResponse,
   PlaygroundManagerOptions,
   PlaygroundEvents,
@@ -29,19 +28,19 @@ export class PlaygroundManager {
   /**
    * Create a new playground.
    *
-   * @param params - {@link PlaygroundCreateParams}
+   * @param name - Name of the playground
+   * @param language - Playground language
+   * @param callback - Callback for response
    * @returns When all callbacks are executed
    */
-  public async create(params: PlaygroundCreateParams) {
-    const { name, language, callback } = params;
-
-    const packet = this._createPacket({
-      event: 'create',
-      callbackId: generateId(),
-      payload: {
-        name,
-        language,
-      },
+  public async create(
+    name: string,
+    env: 'erlang' | 'elixir',
+    callback: MessageHandler
+  ) {
+    const packet = this._createPacket('create', generateId(), {
+      env,
+      name,
     });
     return await this._sendPacket(packet, callback);
   }
@@ -49,20 +48,22 @@ export class PlaygroundManager {
   /**
    * Update (set) playground.
    *
-   * @param params - {@link PlaygroundUpdateParams}
+   * @param name - Name of the playground
+   * @param content - Playground file content
+   * @param deps - Dependencies as `name: version`
+   * @param callback - Callback for response
    * @returns When all callbacks are executed
    */
-  public async update(params: PlaygroundUpdateParams) {
-    const { name, content, dependencies, callback } = params;
-
-    const packet = this._createPacket({
-      event: 'update',
-      callbackId: generateId(),
-      payload: {
-        name,
-        content,
-        dependencies,
-      },
+  public async update(
+    name: string,
+    content: string,
+    dependencies: Record<string, string>,
+    callback: MessageHandler
+  ) {
+    const packet = this._createPacket('update', generateId(), {
+      name,
+      dependencies,
+      content,
     });
     return await this._sendPacket(packet, callback);
   }
@@ -70,34 +71,24 @@ export class PlaygroundManager {
   /**
    * Run playground.
    *
-   * @param params - {@link PlaygroundRunParams}
+   * @param name - Name of the playground
+   * @param callback - Callback for response
    * @returns When all callbacks are executed
    */
-  public async run(params: PlaygroundRunParams) {
-    const { name, callback } = params;
-
-    const packet = this._createPacket({
-      event: 'run',
-      callbackId: generateId(),
-      payload: name,
-    });
+  public async run(name: string, callback: MessageHandler) {
+    const packet = this._createPacket('run', generateId(), name);
     return await this._sendPacket(packet, callback);
   }
 
   /**
    * Remove playground.
    *
-   * @param params {@link PlaygroundRemoveParams}
+   * @param name - Name of the playground
+   * @param callback - Callback for response
    * @returns When all callbacks are executed
    */
-  public async remove(params: PlaygroundRemoveParams) {
-    const { name, callback } = params;
-
-    const packet = this._createPacket({
-      event: 'remove',
-      callbackId: generateId(),
-      payload: name,
-    });
+  public async remove(name: string, callback: MessageHandler) {
+    const packet = this._createPacket('remove', generateId(), name);
     return await this._sendPacket(packet, callback);
   }
 
@@ -109,7 +100,7 @@ export class PlaygroundManager {
     this._websocket = new WebSocket(url);
     this._websocket.addEventListener('message', async ({ data }) => {
       const response: PlaygroundResponse = JSON.parse(data.toString());
-      console.log(response);
+
       this._pool.get(response.id)(response);
       if (response.type !== 'data') {
         this._pool.delete(response.id);
@@ -131,17 +122,16 @@ export class PlaygroundManager {
 
   /**
    * Generate a packet JSON.
-   * @param packetData.event - {@link PlaygroundEvents}
-   * @param packetData.callbackId - Callback id
-   * @param packetData.payload - {@link PlaygroundPacket}
+   * @param event - {@link PlaygroundEvents}
+   * @param callbackId - Callback id
+   * @param payload - {@link PlaygroundPacket}
    * @returns Generated packet
    */
-  private _createPacket<T extends PlaygroundEvents>(packetData: {
-    event: T;
-    callbackId: string;
-    payload: PlaygroundMessage<T>;
-  }): PlaygroundPacket<T> {
-    const { event, callbackId, payload } = packetData;
+  private _createPacket<T extends PlaygroundEvents>(
+    event: T,
+    callbackId: string,
+    payload: PlaygroundMessage<T>
+  ): PlaygroundPacket<T> {
     return {
       id: callbackId,
       message: { [event]: payload } as { [E in T]: PlaygroundMessage<T> },
@@ -167,62 +157,6 @@ export class PlaygroundManager {
 
     return Promise.resolve(true);
   }
-}
-
-interface PlaygroundCreateParams {
-  /**
-   * Name of the playground
-   */
-  name: string;
-  /**
-   * Playground language
-   */
-  language: PlaygroundLanguages;
-  /**
-   * Callback for response
-   */
-  callback: MessageHandler;
-}
-
-interface PlaygroundUpdateParams {
-  /**
-   * Name of the playground
-   */
-  name: string;
-  /**
-   * Playground file content
-   */
-  content: string;
-  /**
-   * Dependencies as `name: version`
-   */
-  dependencies?: Record<string, string>;
-  /**
-   * Callback for response
-   */
-  callback: MessageHandler;
-}
-
-interface PlaygroundRunParams {
-  /**
-   * Name of the playground
-   */
-  name: string;
-  /**
-   * Callback for response
-   */
-  callback: MessageHandler;
-}
-
-interface PlaygroundRemoveParams {
-  /**
-   * Name of the playground
-   */
-  name: string;
-  /**
-   * Callback for response
-   */
-  callback: MessageHandler;
 }
 
 function generateId(): string {
