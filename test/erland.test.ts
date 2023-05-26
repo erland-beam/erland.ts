@@ -10,10 +10,8 @@ describe('Erlang playground', async () => {
   test(
     'Create a playground',
     async () => {
-      await manager.create({
-        name: 'erlang_example',
-        language: 'erlang',
-        callback: (response) => expect(response.type).toBe('ok'),
+      await manager.create('erlang_example', 'erlang', (response) => {
+        expect(response.type).toBe('ok');
       });
     },
     TEST_TIMEOUT
@@ -23,10 +21,8 @@ describe('Erlang playground', async () => {
     'Update playground content',
     async () => {
       const content = 'main(_Args) -> io:format("WoW!~n").';
-      await manager.update({
-        name: 'erlang_example',
-        content,
-        callback: (response) => expect(response.type).toBe('ok'),
+      await manager.update('erlang_example', content, {}, (response) => {
+        expect(response.type).toBe('ok');
       });
     },
     TEST_TIMEOUT
@@ -35,17 +31,14 @@ describe('Erlang playground', async () => {
   test(
     'Run playground content',
     async () => {
-      await manager.run({
-        name: 'erlang_example',
-        callback: (response) => {
-          if (response.type == 'data') {
-            if (!response.data?.startsWith('===>')) {
-              expect(response.data).toBe('WoW!');
-            }
-          } else {
-            expect(response.type).toBe('ok');
+      await manager.run('erlang_example', (response) => {
+        if (response.type == 'data') {
+          if (!response.data?.startsWith('===>')) {
+            expect(response.data).toBe('WoW!');
           }
-        },
+        } else {
+          expect(response.type).toBe('ok');
+        }
       });
     },
     TEST_TIMEOUT
@@ -54,9 +47,8 @@ describe('Erlang playground', async () => {
   test(
     'Remove playground',
     async () => {
-      await manager.remove({
-        name: 'erlang_example',
-        callback: (response) => expect(response.type).toBe('ok'),
+      await manager.remove('erlang_example', (response) => {
+        expect(response.type).toBe('ok');
       });
     },
     TEST_TIMEOUT
