@@ -49,7 +49,7 @@ jobs:
         run: npm ci
 
       - name: Set up Erland Server
-        run: docker run -d -p 8080:8080 meppu/erland:main
+        run: docker run -d -p 8080:8080 ghcr.io/erland-beam/erland:main
 
       - name: Run tests
         run: npm test
