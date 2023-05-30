@@ -64,3 +64,5 @@ describe('Erlang playground', async () => {
 });
 
 describe.todo('Elixir playground');
+
+describe.todo('Gleam playground');
