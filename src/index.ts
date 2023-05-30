@@ -32,7 +32,7 @@ export class PlaygroundManager {
    * @param params - {@link PlaygroundCreateParams}
    * @returns When all callbacks are executed
    */
-  public async create(params: PlaygroundCreateParams) {
+  public async create(params: PlaygroundFunctionParams<'create'>) {
     const { name, env, callback } = params;
 
     const packet = this._createPacket({
@@ -52,7 +52,7 @@ export class PlaygroundManager {
    * @param params - {@link PlaygroundUpdateParams}
    * @returns When all callbacks are executed
    */
-  public async update(params: PlaygroundUpdateParams) {
+  public async update(params: PlaygroundFunctionParams<'update'>) {
     const { name, content, dependencies, callback } = params;
 
     const packet = this._createPacket({
@@ -73,7 +73,7 @@ export class PlaygroundManager {
    * @param params - {@link PlaygroundRunParams}
    * @returns When all callbacks are executed
    */
-  public async run(params: PlaygroundRunParams) {
+  public async run(params: PlaygroundFunctionParams<'run'>) {
     const { name, callback } = params;
 
     const packet = this._createPacket({
@@ -90,7 +90,7 @@ export class PlaygroundManager {
    * @param params {@link PlaygroundRemoveParams}
    * @returns When all callbacks are executed
    */
-  public async remove(params: PlaygroundRemoveParams) {
+  public async remove(params: PlaygroundFunctionParams<'remove'>) {
     const { name, callback } = params;
 
     const packet = this._createPacket({
@@ -169,41 +169,7 @@ export class PlaygroundManager {
   }
 }
 
-interface PlaygroundCreateParams {
-  /**
-   * Name of the playground
-   */
-  name: string;
-  /**
-   * Playground language
-   */
-  env: PlaygroundEnvironments;
-  /**
-   * Callback for response
-   */
-  callback: MessageHandler;
-}
-
-interface PlaygroundUpdateParams {
-  /**
-   * Name of the playground
-   */
-  name: string;
-  /**
-   * Playground file content
-   */
-  content: string;
-  /**
-   * Dependencies as `name: version`
-   */
-  dependencies?: Record<string, string>;
-  /**
-   * Callback for response
-   */
-  callback: MessageHandler;
-}
-
-interface PlaygroundRunParams {
+interface CommonFunctionParams {
   /**
    * Name of the playground
    */
@@ -214,16 +180,27 @@ interface PlaygroundRunParams {
   callback: MessageHandler;
 }
 
-interface PlaygroundRemoveParams {
-  /**
-   * Name of the playground
-   */
-  name: string;
-  /**
-   * Callback for response
-   */
-  callback: MessageHandler;
-}
+type PlaygroundFunctionParams<
+  T extends 'create' | 'update' | 'run' | 'remove'
+> = T extends 'create'
+  ? CommonFunctionParams & {
+      /**
+       * Playground language
+       */
+      env: PlaygroundEnvironments;
+    }
+  : T extends 'update'
+  ? CommonFunctionParams & {
+      /**
+       * Playground file content
+       */
+      content: string;
+      /**
+       * Dependencies as `name: version`
+       */
+      dependencies?: Record<string, string>;
+    }
+  : CommonFunctionParams;
 
 function generateId(): string {
   return Array(12)
