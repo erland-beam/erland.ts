@@ -17,23 +17,22 @@
   ],
   "exports": {
     ".": {
-      "main": "./dist/index.js",
       "module": "./dist/index.mjs",
       "types": "./dist/index.d.ts"
     }
   },
-  "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist/"
   ],
   "scripts": {
-    "build": "tsup src/index.ts",
-    "prepack": "npm run build",
-    "prettier": "prettier -c .",
+    "build": "tsup",
+    "watch": "tsup --watch",
     "test": "vitest --run",
-    "watch": "tsup src/index.ts --watch"
+    "lint:prettier": "prettier -c .",
+    "format:prettier": "prettier --write .",
+    "prepack": "npm run build"
   },
   "dependencies": {
     "ws": "^8.13.0"
@@ -43,7 +42,7 @@
     "prettier": "^2.8.8",
     "tsup": "^6.7.0",
     "typescript": "^5.0.4",
-    "vitest": "^0.31.1"
+    "vitest": "^0.31.3"
   },
   "packageManager": "npm@9.6.7",
   "engines": {

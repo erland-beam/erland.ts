@@ -1,5 +1,3 @@
-import { WebSocket } from 'ws';
-import { setTimeout } from 'node:timers/promises';
 import type {
   MessageHandler,
   PlaygroundEnvironments,
@@ -9,6 +7,8 @@ import type {
   PlaygroundMessage,
   PlaygroundPacket,
 } from './types';
+
+const WebSocket = globalThis?.WebSocket ?? (await import('ws')).WebSocket;
 
 export class PlaygroundManager {
   private _url: string | URL;
@@ -106,6 +106,7 @@ export class PlaygroundManager {
    * @param url - URL of the playground. Defaults to the URL entered into {@link PlaygroundManager}
    */
   public async connect(url = this._url) {
+    // @ts-expect-error
     this._websocket = new WebSocket(url);
     this._websocket.addEventListener('message', async ({ data }) => {
       const response: PlaygroundResponse = JSON.parse(data.toString());
@@ -201,6 +202,10 @@ type PlaygroundFunctionParams<
       dependencies?: Record<string, string>;
     }
   : CommonFunctionParams;
+
+function setTimeout(ms: number) {
+  return new Promise((resolve) => globalThis.setTimeout(resolve, ms));
+}
 
 function generateId(): string {
   return Array(12)
