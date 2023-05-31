@@ -27,11 +27,12 @@
     "dist/"
   ],
   "scripts": {
-    "build": "tsup src/index.ts",
-    "prepack": "npm run build",
-    "prettier": "prettier -c .",
+    "build": "tsup",
+    "watch": "tsup --watch",
     "test": "vitest --run",
-    "watch": "tsup src/index.ts --watch"
+    "lint:prettier": "prettier -c .",
+    "format:prettier": "prettier --write .",
+    "prepack": "npm run build"
   },
   "dependencies": {
     "ws": "^8.13.0"

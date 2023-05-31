@@ -5,10 +5,10 @@ import type {
   PlaygroundManagerOptions,
   PlaygroundEvents,
   PlaygroundMessage,
-  PlaygroundPacket
+  PlaygroundPacket,
 } from './types';
 
-const WebSocket =  globalThis?.WebSocket ?? (await import("ws")).WebSocket;
+const WebSocket = globalThis?.WebSocket ?? (await import('ws')).WebSocket;
 
 export class PlaygroundManager {
   private _url: string | URL;
@@ -204,7 +204,7 @@ type PlaygroundFunctionParams<
   : CommonFunctionParams;
 
 function setTimeout(ms: number) {
-    return new Promise(resolve => globalThis.setTimeout(resolve, ms));
+  return new Promise((resolve) => globalThis.setTimeout(resolve, ms));
 }
 
 function generateId(): string {
